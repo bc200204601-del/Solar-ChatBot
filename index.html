@@ -1,78 +1,74 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Solar Chatbot – Rawalpindi</title>
-<link rel="stylesheet" href="styles.css" />
 <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 <style>
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; padding:0; }
-main { max-width: 800px; margin: 48px auto; padding:0 16px; }
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; }
+main { max-width:800px; margin:48px auto; padding:0 16px; }
 h1 { margin-bottom:8px; }
-p { color:#333; }
-button { margin:5px; padding:8px 12px; cursor:pointer; background:#0b57d0; color:#fff; border:none; border-radius:5px; }
-.pricing-calculator { margin-top:20px; padding:10px; border:1px solid #ccc; border-radius:5px; }
-#priceResult { margin-top:10px; font-weight:bold; }
+.button-container { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; }
+button { padding:10px 16px; border:none; border-radius:5px; background:#0b57d0; color:#fff; cursor:pointer; }
+button:hover{ background:#0845a1; }
+.pricing-calculator { display:none; margin-top:24px; padding:16px; border:1px solid #ccc; border-radius:8px; max-width:400px; }
+#priceResult { margin-top:12px; font-weight:bold; }
 </style>
 </head>
 <body>
 <main>
 <h1>Solar Chatbot – Rawalpindi (RWP)</h1>
-<p>Ask about system sizing, cost, net metering, and FAQs.</p>
-
-<!-- Buttons -->
-<div>
-<button onclick="sendIntent('Get_System_Size')">System Size</button>
-<button onclick="sendIntent('Check_Cost')">Cost Estimate</button>
-<button onclick="sendIntent('Learn_Net_Metering')">Net Metering</button>
+<div class="button-container">
+<button onclick="sendEvent('Get_System_Size')">System Size</button>
+<button onclick="showCalculator()">Cost Estimate</button>
+<button onclick="sendEvent('Learn_Net_Metering')">Net Metering</button>
+<button onclick="sendEvent('Solar_FAQ')">FAQs</button>
 </div>
 
-<!-- Calculator -->
-<div class="pricing-calculator">
-    <h3>Quick Solar Price Calculator</h3>
-    <select id="systemSize">
-        <option value="3">3kW System</option>
-        <option value="5">5kW System</option>
-        <option value="10">10kW System</option>
-        <option value="15">15kW System</option>
-        <option value="20">20kW System</option>
-    </select>
-    <button onclick="calculatePrice()">Calculate Price</button>
-    <div id="priceResult"></div>
+<!-- Quick Price Calculator -->
+<div class="pricing-calculator" id="calculator">
+<h3>Quick Price Calculator</h3>
+<select id="systemSize">
+<option value="3">3kW</option>
+<option value="5">5kW</option>
+<option value="10">10kW</option>
+<option value="15">15kW</option>
+<option value="20">20kW</option>
+</select>
+<button onclick="calculatePrice()">Calculate Price</button>
+<div id="priceResult"></div>
 </div>
 </main>
 
-<!-- Dialogflow Messenger -->
 <df-messenger chat-title="Solar RWP Bot" agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2" language-code="en"></df-messenger>
 
 <script>
-function sendIntent(intentName){
-    const dfMessenger = document.querySelector('df-messenger');
-    if(dfMessenger){
-        dfMessenger.renderCustomText(intentName);
-    }
+const dfMessenger = document.querySelector('df-messenger');
+function sendEvent(eventName){ dfMessenger.renderCustomText(`__event__:${eventName}`); }
+
+function showCalculator(){
+  sendEvent('Check_Cost'); 
+  document.getElementById('calculator').style.display='block';
 }
 
-function calculatePrice() {
-    const size = parseInt(document.getElementById('systemSize').value);
-    const systems = {
-        3: {price: 650000, savings: "PKR 12,000 – 15,000/month", payback: "3.5 – 4 years"},
-        5: {price: 950000, savings: "PKR 20,000 – 25,000/month", payback: "3 – 3.5 years"},
-        10: {price: 1750000, savings: "PKR 40,000 – 50,000/month", payback: "2.5 – 3 years"},
-        15: {price: 2500000, savings: "PKR 60,000 – 75,000/month", payback: "2.5 – 3 years"},
-        20: {price: 3200000, savings: "PKR 80,000 – 100,000/month", payback: "2 – 2.5 years"}
-    };
-    const system = systems[size];
-    document.getElementById('priceResult').innerHTML = `
-        💡 Estimated cost: PKR ${system.price.toLocaleString()}<br>
-        💰 Monthly Savings: ${system.savings}<br>
-        ⏳ Payback Period: ${system.payback}
-    `;
-    const dfMessenger = document.querySelector('df-messenger');
-    if(dfMessenger){
-        dfMessenger.renderCustomText(`Check_Cost for ${size}kW system`);
-    }
+const costBreakdown = {
+3:{total:650000, panels:300000, inverter:80000, installation:270000},
+5:{total:950000, panels:450000, inverter:120000, installation:380000},
+10:{total:1750000, panels:850000, inverter:250000, installation:650000},
+15:{total:2500000, panels:1200000, inverter:350000, installation:950000},
+20:{total:3200000, panels:1600000, inverter:450000, installation:1150000}
+};
+
+function calculatePrice(){
+  const size=document.getElementById('systemSize').value;
+  const price=costBreakdown[size];
+  document.getElementById('priceResult').innerHTML=
+    `Estimated total: PKR ${price.total.toLocaleString()}<br>
+     Breakdown:<br>
+     • Panels: PKR ${price.panels.toLocaleString()}<br>
+     • Inverter: PKR ${price.inverter.toLocaleString()}<br>
+     • Installation: PKR ${price.installation.toLocaleString()}`;
 }
 </script>
 </body>
