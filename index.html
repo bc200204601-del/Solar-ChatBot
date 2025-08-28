@@ -11,7 +11,40 @@
       margin: 0;
       padding: 0;
       height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+
+    h2 {
+      text-align: center;
+      padding: 20px;
+      color: #007bff;
+    }
+
+    .btn-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
     df-messenger {
       --df-messenger-bot-message: #f4f4f9;
       --df-messenger-button-titlebar-color: #007bff;
@@ -22,10 +55,19 @@
   </style>
 </head>
 <body>
-  <h2 style="text-align:center; padding:20px;">💡 Solar Power Chatbot (Rawalpindi)</h2>
-  
+  <h2>💡 Solar Power Chatbot (Rawalpindi)</h2>
+
+  <!-- Quick Action Buttons -->
+  <div class="btn-container">
+    <button class="btn" onclick="sendMessage('Get System Size')">🌞 Get System Size</button>
+    <button class="btn" onclick="sendMessage('Cost Estimation')">💰 Cost Estimation</button>
+    <button class="btn" onclick="sendMessage('Find Installers in Rawalpindi')">🏗 Find Installers</button>
+    <button class="btn" onclick="sendMessage('Learn Net Metering')">⚡ Learn Net Metering</button>
+    <button class="btn" onclick="sendMessage('Solar FAQ')">❓ Solar FAQ</button>
+  </div>
+
   <!-- Dialogflow Messenger Widget -->
- <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 <df-messenger
   chat-icon="https:&#x2F;&#x2F;www.google.com&#x2F;search?sca_esv=b4e332f294b324c3&amprlz=1C1CHBF_enPK1096PK1097&ampudm=2&ampfbs=AIIjpHxU7SXXniUZfeShr2fp4giZ1Y6MJ25_tmWITc7uy4KIeoJTKjrFjVxydQWqI2NcOha3O1YqG67F0QIhAOFN_ob1xGdzU5Cnyn-oUzTul2B5TXRzAeIy3FI7wzggwHPeZE5cVxJF3TSy6VJy__A91WVw8jso2MVzslHtne5IBzFZ7wiBgKvuGJadfgZ9to9wUGx5Slqn&ampq=agent+avatar+solar+url&ampsa=X&ampved=2ahUKEwjih4iEgauPAxWh7AIHHe9EKEMQtKgLegQIEhAB&ampbiw=1344&ampbih=671&ampdpr=1.25#vhid=4xI1dWFfBAmyMM&ampvssid=mosaic"
   intent="WELCOME"
@@ -33,5 +75,15 @@
   agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2"
   language-code="en"
 ></df-messenger>
+
+  <script>
+    function sendMessage(msg) {
+      const messenger = document.querySelector("df-messenger");
+      // open the chat window if it is minimized
+      messenger.setAttribute("chat-open", "true");
+      // send the message to bot
+      messenger.renderCustomText(msg);
+    }
+  </script>
 </body>
 </html>
