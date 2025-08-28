@@ -93,6 +93,75 @@ df-messenger {
     color: #1a73e8;
     display: none;
 }
+/* Debug Panel Styles */
+.debug-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 12px;
+    max-width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+.debug-panel h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+.debug-panel button {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.debug-panel .debug-content {
+    max-height: 150px;
+    overflow-y: auto;
+}
+.debug-panel .debug-entry {
+    margin-bottom: 5px;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+/* Conversation State Styles */
+.conversation-state {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(26, 115, 232, 0.9);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 12px;
+    max-width: 250px;
+    z-index: 1000;
+}
+.conversation-state h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+.conversation-state .state-item {
+    margin-bottom: 5px;
+}
+.conversation-state button {
+    background: white;
+    color: #1a73e8;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 10px;
+    margin-top: 5px;
+}
 </style>
 </head>
 <body>
@@ -114,7 +183,7 @@ df-messenger {
             ❓ FAQs
         </button>
     </div>
-
+    
     <!-- Quick Price Calculator -->
     <div class="pricing-calculator" id="calculator">
         <h3>💰 Quick Price Calculator</h3>
@@ -130,11 +199,29 @@ df-messenger {
         </button>
         <div id="priceResult"></div>
     </div>
-
+    
     <div class="status-message" id="statusMessage">
         Initializing chatbot...
     </div>
 </main>
+
+<!-- Debug Panel -->
+<div class="debug-panel" id="debugPanel">
+    <h3>Debug Panel</h3>
+    <div class="debug-content" id="debugContent">
+        <div class="debug-entry">Waiting for debug info...</div>
+    </div>
+    <button onclick="clearDebug()">Clear</button>
+</div>
+
+<!-- Conversation State Panel -->
+<div class="conversation-state" id="conversationState">
+    <h3>Conversation State</h3>
+    <div class="state-item" id="stateBill">Bill: Not set</div>
+    <div class="state-item" id="stateUnits">Units: Not set</div>
+    <div class="state-item" id="stateArea">Area: Not set</div>
+    <button onclick="clearState()">Clear State</button>
+</div>
 
 <df-messenger 
     chat-title="Solar RWP Bot" 
@@ -144,47 +231,103 @@ df-messenger {
 </df-messenger>
 
 <script>
-// Wait for Dialogflow Messenger to load
-window.addEventListener('dfMessengerLoaded', function(event) {
-    const dfMessenger = document.querySelector('df-messenger');
-    const statusMessage = document.getElementById('statusMessage');
+// Local Storage Functions
+function saveToLocalStorage(key, value) {
+    localStorage.setItem(`solarBot_${key}`, JSON.stringify(value));
+    addDebug(`Saved to localStorage: ${key} = ${value}`);
+}
+
+function getFromLocalStorage(key) {
+    const value = localStorage.getItem(`solarBot_${key}`);
+    if (value) {
+        return JSON.parse(value);
+    }
+    return null;
+}
+
+// Debug Functions
+function addDebug(message) {
+    const debugContent = document.getElementById('debugContent');
+    const timestamp = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = 'debug-entry';
+    entry.innerHTML = `[${timestamp}] ${message}`;
+    debugContent.appendChild(entry);
+    debugContent.scrollTop = debugContent.scrollHeight;
+}
+
+function clearDebug() {
+    document.getElementById('debugContent').innerHTML = '';
+}
+
+// Conversation State Functions
+function updateConversationState(key, value) {
+    saveToLocalStorage(key, value);
+    const element = document.getElementById(`state${key.charAt(0).toUpperCase() + key.slice(1)}`);
+    if (element) {
+        element.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`;
+    }
+    addDebug(`Updated state: ${key} = ${value}`);
+}
+
+function clearState() {
+    localStorage.removeItem('solarBot_bill');
+    localStorage.removeItem('solarBot_units');
+    localStorage.removeItem('solarBot_area');
+    document.getElementById('stateBill').textContent = 'Bill: Not set';
+    document.getElementById('stateUnits').textContent = 'Units: Not set';
+    document.getElementById('stateArea').textContent = 'Area: Not set';
+    addDebug('Cleared conversation state');
+}
+
+// Initialize conversation state from localStorage
+function initializeConversationState() {
+    const bill = getFromLocalStorage('bill');
+    const units = getFromLocalStorage('units');
+    const area = getFromLocalStorage('area');
     
-    // Show status message
-    statusMessage.style.display = 'block';
-    statusMessage.textContent = 'Chatbot loaded successfully!';
+    if (bill) updateConversationState('bill', bill);
+    if (units) updateConversationState('units', units);
+    if (area) updateConversationState('area', area);
     
-    // Hide status after 3 seconds
-    setTimeout(() => {
-        statusMessage.style.display = 'none';
-    }, 3000);
+    addDebug(`Initialized state: bill=${bill}, units=${units}, area=${area}`);
+}
+
+// Enhanced event sending with conversation context
+function sendEvent(eventName, data = {}) {
+    addDebug(`Sending event: ${eventName}`);
     
-    // Custom event sending function
-    window.sendEvent = function(eventName) {
-        console.log('Sending event:', eventName);
-        
-        if (dfMessenger && dfMessenger.sendEvent) {
-            dfMessenger.sendEvent({
-                name: eventName,
-                data: {},
-                languageCode: 'en'
-            });
-        } else {
-            console.error('Dialogflow Messenger not loaded');
-            alert('Chatbot is still loading. Please try again in a moment.');
-        }
-    };
+    // Save conversation context
+    if (eventName === 'Get_System_Size') {
+        // Clear previous state when starting a new system size calculation
+        clearState();
+    }
     
-    // Show calculator function
-    window.showCalculator = function() {
-        sendEvent('Check_Cost'); 
-        document.getElementById('calculator').style.display = 'block';
-        document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
-    };
-});
+    if (dfMessenger && dfMessenger.sendEvent) {
+        dfMessenger.sendEvent({
+            name: eventName,
+            data: data,
+            languageCode: 'en'
+        });
+    } else {
+        addDebug('Error: Dialogflow Messenger not available');
+        alert('Chatbot is still loading. Please try again in a moment.');
+    }
+}
+
+// Enhanced show calculator with state
+function showCalculator() {
+    addDebug('Showing calculator');
+    sendEvent('Check_Cost'); 
+    document.getElementById('calculator').style.display = 'block';
+    document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+}
 
 // Price calculation function
 window.calculatePrice = function() {
     const size = document.getElementById('systemSize').value;
+    addDebug(`Calculating price for ${size}kW system`);
+    
     const costBreakdown = {
         3: {total: 650000, panels: 300000, inverter: 80000, installation: 270000},
         5: {total: 950000, panels: 450000, inverter: 120000, installation: 380000},
@@ -208,9 +351,65 @@ window.calculatePrice = function() {
     }
 };
 
+// Wait for Dialogflow Messenger to load
+window.addEventListener('dfMessengerLoaded', function(event) {
+    const dfMessenger = document.querySelector('df-messenger');
+    const statusMessage = document.getElementById('statusMessage');
+    
+    addDebug('Dialogflow Messenger loaded');
+    
+    // Show status message
+    statusMessage.style.display = 'block';
+    statusMessage.textContent = 'Chatbot loaded successfully!';
+    
+    // Hide status after 3 seconds
+    setTimeout(() => {
+        statusMessage.style.display = 'none';
+    }, 3000);
+    
+    // Initialize conversation state
+    initializeConversationState();
+    
+    // Custom event sending function
+    window.sendEvent = sendEvent;
+    
+    // Show calculator function
+    window.showCalculator = showCalculator;
+    
+    // Intercept responses to maintain state
+    const originalRenderCustomText = dfMessenger.renderCustomText;
+    dfMessenger.renderCustomText = function(text) {
+        addDebug(`Bot response: ${text}`);
+        
+        // Parse response to extract values and update state
+        if (text.includes('bill of PKR')) {
+            const match = text.match(/bill of PKR ([\d,]+)/);
+            if (match) {
+                updateConversationState('bill', match[1]);
+            }
+        }
+        
+        if (text.includes('units/month')) {
+            const match = text.match(/([\d]+) units\/month/);
+            if (match) {
+                updateConversationState('units', match[1]);
+            }
+        }
+        
+        if (text.includes('roof area of')) {
+            const match = text.match(/roof area of ([\d]+) (sq ft|marla)/);
+            if (match) {
+                updateConversationState('area', `${match[1]} ${match[2]}`);
+            }
+        }
+        
+        return originalRenderCustomText.call(dfMessenger, text);
+    };
+});
+
 // Error handling for Dialogflow Messenger
 window.addEventListener('dfMessengerError', function(event) {
-    console.error('Dialogflow Messenger error:', event);
+    addDebug(`Dialogflow error: ${event.detail.message}`);
     const statusMessage = document.getElementById('statusMessage');
     statusMessage.style.display = 'block';
     statusMessage.textContent = 'Error loading chatbot. Please refresh the page.';
@@ -220,7 +419,8 @@ window.addEventListener('dfMessengerError', function(event) {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Page loaded, waiting for Dialogflow Messenger...');
+    addDebug('Page loaded, waiting for Dialogflow Messenger...');
+    initializeConversationState();
 });
 </script>
 </body>
