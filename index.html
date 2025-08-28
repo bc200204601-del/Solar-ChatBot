@@ -28,7 +28,6 @@
       gap: 15px;
       justify-content: center;
       margin: 20px 0;
-      z-index: 1000; /* Make sure buttons are above other elements */
     }
 
     .btn {
@@ -46,12 +45,10 @@
       background: #0056b3;
     }
 
-    /* Ensure chatbot stays fixed in bottom-right */
     df-messenger {
       position: fixed;
       bottom: 16px;
       right: 16px;
-      z-index: 999; /* keep chatbot above background but below buttons */
       --df-messenger-bot-message: #f4f4f9;
       --df-messenger-button-titlebar-color: #007bff;
       --df-messenger-chat-background-color: #ffffff;
@@ -65,11 +62,11 @@
 
   <!-- Quick Action Buttons -->
   <div class="btn-container">
-    <button class="btn" onclick="sendMessage('Get System Size')">🌞 Get System Size</button>
-    <button class="btn" onclick="sendMessage('Cost Estimation')">💰 Cost Estimation</button>
-    <button class="btn" onclick="sendMessage('Find Installers in Rawalpindi')">🏗 Find Installers</button>
-    <button class="btn" onclick="sendMessage('Learn Net Metering')">⚡ Learn Net Metering</button>
-    <button class="btn" onclick="sendMessage('Solar FAQ')">❓ Solar FAQ</button>
+    <button class="btn" onclick="openChat('Get System Size')">🌞 Get System Size</button>
+    <button class="btn" onclick="openChat('Cost Estimation')">💰 Cost Estimation</button>
+    <button class="btn" onclick="openChat('Find Installers in Rawalpindi')">🏗 Find Installers</button>
+    <button class="btn" onclick="openChat('Learn Net Metering')">⚡ Learn Net Metering</button>
+    <button class="btn" onclick="openChat('Solar FAQ')">❓ Solar FAQ</button>
   </div>
 
   <!-- Dialogflow Messenger Widget -->
@@ -83,10 +80,16 @@
 ></df-messenger>
 
   <script>
-    function sendMessage(msg) {
-      const messenger = document.querySelector("df-messenger");
-      messenger.setAttribute("chat-open", "true"); // open the chat window
-      messenger.renderCustomText(msg); // send message
+    function openChat(message) {
+      // open the chatbot window
+      const dfMessenger = document.querySelector("df-messenger");
+      dfMessenger.setAttribute("chat-open", "true");
+
+      // create a fake "chip" click event to simulate user typing
+      const event = new CustomEvent("df-messenger-send", {
+        detail: { message }
+      });
+      window.dispatchEvent(event);
     }
   </script>
 </body>
