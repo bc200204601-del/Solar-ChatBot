@@ -6,70 +6,222 @@
 <title>Solar Chatbot – Rawalpindi</title>
 <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 <style>
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; }
-main { max-width:800px; margin:48px auto; padding:0 16px; }
-h1 { margin-bottom:8px; }
-.button-container { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; }
-button { padding:10px 16px; border:none; border-radius:5px; background:#0b57d0; color:#fff; cursor:pointer; }
-button:hover{ background:#0845a1; }
-.pricing-calculator { display:none; margin-top:24px; padding:16px; border:1px solid #ccc; border-radius:8px; max-width:400px; }
-#priceResult { margin-top:12px; font-weight:bold; }
+body { 
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+    margin:0; 
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+main { 
+    max-width:800px; 
+    margin:48px auto; 
+    padding:0 16px; 
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 32px;
+}
+h1 { 
+    margin-bottom:24px; 
+    color: #1a73e8;
+    text-align: center;
+}
+.subtitle {
+    text-align: center;
+    color: #5f6368;
+    margin-bottom: 32px;
+}
+.button-container { 
+    display:flex; 
+    flex-wrap:wrap; 
+    gap:12px; 
+    margin:16px 0; 
+    justify-content: center;
+}
+button { 
+    padding:12px 24px; 
+    border:none; 
+    border-radius:8px; 
+    background:#1a73e8; 
+    color:#fff; 
+    cursor:pointer; 
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+button:hover{ 
+    background:#1557b0; 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.pricing-calculator { 
+    display:none; 
+    margin-top:32px; 
+    padding:24px; 
+    border:1px solid #dadce0; 
+    border-radius:12px; 
+    max-width:500px;
+    background: #f8f9fa;
+}
+#priceResult { 
+    margin-top:16px; 
+    font-weight:bold; 
+    color: #1a73e8;
+    padding: 16px;
+    background: #e8f0fe;
+    border-radius: 8px;
+}
+df-messenger {
+    --df-messenger-bot-message: #1a73e8;
+    --df-messenger-button-titlebar-color: #1a73e8;
+    --df-messenger-chat-background-color: #ffffff;
+    --df-messenger-font-color: #5f6368;
+    --df-messenger-send-icon: #1a73e8;
+    --df-messenger-user-message: #e8f0fe;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+}
+.status-message {
+    text-align: center;
+    padding: 12px;
+    margin: 16px 0;
+    border-radius: 8px;
+    background: #e8f0fe;
+    color: #1a73e8;
+    display: none;
+}
 </style>
 </head>
 <body>
 <main>
-<h1>Solar Chatbot – Rawalpindi (RWP)</h1>
-<div class="button-container">
-<button onclick="sendEvent('Get_System_Size')">System Size</button>
-<button onclick="showCalculator()">Cost Estimate</button>
-<button onclick="sendEvent('Learn_Net_Metering')">Net Metering</button>
-<button onclick="sendEvent('Solar_FAQ')">FAQs</button>
-</div>
+    <h1>🌞 Solar Chatbot – Rawalpindi (RWP)</h1>
+    <p class="subtitle">Your expert guide to solar energy solutions in Pakistan</p>
+    
+    <div class="button-container">
+        <button onclick="sendEvent('Get_System_Size')">
+            📏 System Size
+        </button>
+        <button onclick="showCalculator()">
+            💰 Cost Estimate
+        </button>
+        <button onclick="sendEvent('Learn_Net_Metering')">
+            ⚡ Net Metering
+        </button>
+        <button onclick="sendEvent('Solar_FAQ')">
+            ❓ FAQs
+        </button>
+    </div>
 
-<!-- Quick Price Calculator -->
-<div class="pricing-calculator" id="calculator">
-<h3>Quick Price Calculator</h3>
-<select id="systemSize">
-<option value="3">3kW</option>
-<option value="5">5kW</option>
-<option value="10">10kW</option>
-<option value="15">15kW</option>
-<option value="20">20kW</option>
-</select>
-<button onclick="calculatePrice()">Calculate Price</button>
-<div id="priceResult"></div>
-</div>
+    <!-- Quick Price Calculator -->
+    <div class="pricing-calculator" id="calculator">
+        <h3>💰 Quick Price Calculator</h3>
+        <select id="systemSize" style="width: 100%; padding: 10px; margin: 12px 0; border-radius: 6px; border: 1px solid #dadce0;">
+            <option value="3">3kW System</option>
+            <option value="5">5kW System</option>
+            <option value="10">10kW System</option>
+            <option value="15">15kW System</option>
+            <option value="20">20kW System</option>
+        </select>
+        <button onclick="calculatePrice()" style="width: 100%; margin-bottom: 12px;">
+            Calculate Price
+        </button>
+        <div id="priceResult"></div>
+    </div>
+
+    <div class="status-message" id="statusMessage">
+        Initializing chatbot...
+    </div>
 </main>
 
-<df-messenger chat-title="Solar RWP Bot" agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2" language-code="en"></df-messenger>
+<df-messenger 
+    chat-title="Solar RWP Bot" 
+    agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2" 
+    language-code="en"
+    intent="WELCOME">
+</df-messenger>
 
 <script>
-const dfMessenger = document.querySelector('df-messenger');
-function sendEvent(eventName){ dfMessenger.renderCustomText(`__event__:${eventName}`); }
+// Wait for Dialogflow Messenger to load
+window.addEventListener('dfMessengerLoaded', function(event) {
+    const dfMessenger = document.querySelector('df-messenger');
+    const statusMessage = document.getElementById('statusMessage');
+    
+    // Show status message
+    statusMessage.style.display = 'block';
+    statusMessage.textContent = 'Chatbot loaded successfully!';
+    
+    // Hide status after 3 seconds
+    setTimeout(() => {
+        statusMessage.style.display = 'none';
+    }, 3000);
+    
+    // Custom event sending function
+    window.sendEvent = function(eventName) {
+        console.log('Sending event:', eventName);
+        
+        if (dfMessenger && dfMessenger.sendEvent) {
+            dfMessenger.sendEvent({
+                name: eventName,
+                data: {},
+                languageCode: 'en'
+            });
+        } else {
+            console.error('Dialogflow Messenger not loaded');
+            alert('Chatbot is still loading. Please try again in a moment.');
+        }
+    };
+    
+    // Show calculator function
+    window.showCalculator = function() {
+        sendEvent('Check_Cost'); 
+        document.getElementById('calculator').style.display = 'block';
+        document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+    };
+});
 
-function showCalculator(){
-  sendEvent('Check_Cost'); 
-  document.getElementById('calculator').style.display='block';
-}
-
-const costBreakdown = {
-3:{total:650000, panels:300000, inverter:80000, installation:270000},
-5:{total:950000, panels:450000, inverter:120000, installation:380000},
-10:{total:1750000, panels:850000, inverter:250000, installation:650000},
-15:{total:2500000, panels:1200000, inverter:350000, installation:950000},
-20:{total:3200000, panels:1600000, inverter:450000, installation:1150000}
+// Price calculation function
+window.calculatePrice = function() {
+    const size = document.getElementById('systemSize').value;
+    const costBreakdown = {
+        3: {total: 650000, panels: 300000, inverter: 80000, installation: 270000},
+        5: {total: 950000, panels: 450000, inverter: 120000, installation: 380000},
+        10: {total: 1750000, panels: 850000, inverter: 250000, installation: 650000},
+        15: {total: 2500000, panels: 1200000, inverter: 350000, installation: 950000},
+        20: {total: 3200000, panels: 1600000, inverter: 450000, installation: 1150000}
+    };
+    
+    const price = costBreakdown[size];
+    if (price) {
+        document.getElementById('priceResult').innerHTML = 
+            `<strong>Estimated Total: PKR ${price.total.toLocaleString()}</strong><br><br>
+            <strong>Breakdown:</strong><br>
+            • Solar Panels: PKR ${price.panels.toLocaleString()}<br>
+            • Inverter: PKR ${price.inverter.toLocaleString()}<br>
+            • Installation: PKR ${price.installation.toLocaleString()}<br><br>
+            <em>Prices include taxes and standard installation. Final quote may vary based on site conditions.</em>`;
+    } else {
+        document.getElementById('priceResult').innerHTML = 
+            '<strong style="color: red;">Please select a system size</strong>';
+    }
 };
 
-function calculatePrice(){
-  const size=document.getElementById('systemSize').value;
-  const price=costBreakdown[size];
-  document.getElementById('priceResult').innerHTML=
-    `Estimated total: PKR ${price.total.toLocaleString()}<br>
-     Breakdown:<br>
-     • Panels: PKR ${price.panels.toLocaleString()}<br>
-     • Inverter: PKR ${price.inverter.toLocaleString()}<br>
-     • Installation: PKR ${price.installation.toLocaleString()}`;
-}
+// Error handling for Dialogflow Messenger
+window.addEventListener('dfMessengerError', function(event) {
+    console.error('Dialogflow Messenger error:', event);
+    const statusMessage = document.getElementById('statusMessage');
+    statusMessage.style.display = 'block';
+    statusMessage.textContent = 'Error loading chatbot. Please refresh the page.';
+    statusMessage.style.background = '#fce8e6';
+    statusMessage.style.color = '#d93025';
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, waiting for Dialogflow Messenger...');
+});
 </script>
 </body>
 </html>
