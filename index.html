@@ -1,54 +1,79 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Solar Chatbot – Rawalpindi</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; }
-    main { max-width: 800px; margin: 48px auto; padding: 0 16px; }
-    h1 { margin-bottom: 8px; }
-    p { color: #333; }
-    .button-container { margin: 16px 0; display:flex; flex-wrap:wrap; gap: 12px; }
-    button { padding: 10px 16px; border:none; border-radius:5px; background-color:#0b57d0; color:#fff; cursor:pointer; }
-    button:hover { background-color:#0845a1; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Solar Chatbot – Rawalpindi</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+<style>
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; padding:0; }
+main { max-width: 800px; margin: 48px auto; padding:0 16px; }
+h1 { margin-bottom:8px; }
+p { color:#333; }
+button { margin:5px; padding:8px 12px; cursor:pointer; background:#0b57d0; color:#fff; border:none; border-radius:5px; }
+.pricing-calculator { margin-top:20px; padding:10px; border:1px solid #ccc; border-radius:5px; }
+#priceResult { margin-top:10px; font-weight:bold; }
+</style>
 </head>
 <body>
-  <main>
-    <h1>Solar Chatbot – Rawalpindi (RWP)</h1>
-    <p>Click a button or type your query:</p>
+<main>
+<h1>Solar Chatbot – Rawalpindi (RWP)</h1>
+<p>Ask about system sizing, cost, net metering, and FAQs.</p>
 
-    <div class="button-container">
-      <button onclick="sendEvent('Get_System_Size')">System Size</button>
-      <button onclick="sendEvent('Check_Cost')">Cost Estimate</button>
-      <button onclick="sendEvent('Learn_Net_Metering')">Net Metering</button>
-      <button onclick="sendEvent('Solar_FAQ')">FAQs</button>
-    </div>
-  </main>
+<!-- Buttons -->
+<div>
+<button onclick="sendIntent('Get_System_Size')">System Size</button>
+<button onclick="sendIntent('Check_Cost')">Cost Estimate</button>
+<button onclick="sendIntent('Learn_Net_Metering')">Net Metering</button>
+</div>
 
-  <df-messenger
-      chat-title="Solar RWP Bot"
-      agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2"
-      language-code="en"
-      intent="WELCOME">
-  </df-messenger>
+<!-- Calculator -->
+<div class="pricing-calculator">
+    <h3>Quick Solar Price Calculator</h3>
+    <select id="systemSize">
+        <option value="3">3kW System</option>
+        <option value="5">5kW System</option>
+        <option value="10">10kW System</option>
+        <option value="15">15kW System</option>
+        <option value="20">20kW System</option>
+    </select>
+    <button onclick="calculatePrice()">Calculate Price</button>
+    <div id="priceResult"></div>
+</div>
+</main>
 
-  <script>
+<!-- Dialogflow Messenger -->
+<df-messenger chat-title="Solar RWP Bot" agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2" language-code="en"></df-messenger>
+
+<script>
+function sendIntent(intentName){
     const dfMessenger = document.querySelector('df-messenger');
-
-    function sendEvent(eventName) {
-      dfMessenger.renderCustomText(`__event__:${eventName}`);
+    if(dfMessenger){
+        dfMessenger.renderCustomText(intentName);
     }
+}
 
-    // Optional: Auto-focus chat window when button clicked
-    const buttons = document.querySelectorAll('.button-container button');
-    buttons.forEach(btn => btn.addEventListener('click', () => {
-      const chatIframe = dfMessenger.shadowRoot.querySelector('iframe');
-      if(chatIframe) chatIframe.contentWindow.focus();
-    }));
-  </script>
+function calculatePrice() {
+    const size = parseInt(document.getElementById('systemSize').value);
+    const systems = {
+        3: {price: 650000, savings: "PKR 12,000 – 15,000/month", payback: "3.5 – 4 years"},
+        5: {price: 950000, savings: "PKR 20,000 – 25,000/month", payback: "3 – 3.5 years"},
+        10: {price: 1750000, savings: "PKR 40,000 – 50,000/month", payback: "2.5 – 3 years"},
+        15: {price: 2500000, savings: "PKR 60,000 – 75,000/month", payback: "2.5 – 3 years"},
+        20: {price: 3200000, savings: "PKR 80,000 – 100,000/month", payback: "2 – 2.5 years"}
+    };
+    const system = systems[size];
+    document.getElementById('priceResult').innerHTML = `
+        💡 Estimated cost: PKR ${system.price.toLocaleString()}<br>
+        💰 Monthly Savings: ${system.savings}<br>
+        ⏳ Payback Period: ${system.payback}
+    `;
+    const dfMessenger = document.querySelector('df-messenger');
+    if(dfMessenger){
+        dfMessenger.renderCustomText(`Check_Cost for ${size}kW system`);
+    }
+}
+</script>
 </body>
 </html>
