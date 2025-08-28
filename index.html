@@ -2,29 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Solar Power Chatbot - Web Demo</title>
+  <title>Solar Power Chatbot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
       margin: 0;
       padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
-      background: #f4f4f9;
-      font-family: Arial, sans-serif;
     }
-    iframe {
-      border: none;
-      width: 400px;
-      height: 600px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    df-messenger {
+      --df-messenger-bot-message: #f4f4f9;
+      --df-messenger-button-titlebar-color: #007bff;
+      --df-messenger-chat-background-color: #ffffff;
+      --df-messenger-font-color: #000;
+      --df-messenger-send-icon: #007bff;
     }
   </style>
 </head>
 <body>
-  <iframe src="https://bot.dialogflow.com/728466b3-b1f9-4094-9b64-ece38da84ac2" ></iframe>
+  <h2 style="text-align:center; padding:20px;">💡 Solar Power Chatbot (Rawalpindi)</h2>
+  
+  <!-- Dialogflow Messenger Widget -->
+ <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+<df-messenger
+  chat-icon="https:&#x2F;&#x2F;www.google.com&#x2F;search?sca_esv=b4e332f294b324c3&amprlz=1C1CHBF_enPK1096PK1097&ampudm=2&ampfbs=AIIjpHxU7SXXniUZfeShr2fp4giZ1Y6MJ25_tmWITc7uy4KIeoJTKjrFjVxydQWqI2NcOha3O1YqG67F0QIhAOFN_ob1xGdzU5Cnyn-oUzTul2B5TXRzAeIy3FI7wzggwHPeZE5cVxJF3TSy6VJy__A91WVw8jso2MVzslHtne5IBzFZ7wiBgKvuGJadfgZ9to9wUGx5Slqn&ampq=agent+avatar+solar+url&ampsa=X&ampved=2ahUKEwjih4iEgauPAxWh7AIHHe9EKEMQtKgLegQIEhAB&ampbiw=1344&ampbih=671&ampdpr=1.25#vhid=4xI1dWFfBAmyMM&ampvssid=mosaic"
+  intent="WELCOME"
+  chat-title="SolarPowerBot_RWP"
+  agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2"
+  language-code="en"
+></df-messenger>
 </body>
 </html>
