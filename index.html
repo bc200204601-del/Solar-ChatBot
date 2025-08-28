@@ -1,77 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Solar Power Chatbot - Rawalpindi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solar Chatbot + Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       background: #f8f9fa;
-      padding: 40px;
+      margin: 0;
+      padding: 20px;
     }
-    h1 {
-      color: #2b6cb0;
+    h2 {
+      color: #333;
     }
-    .btn-container {
-      margin: 20px auto;
+    .pricing-calculator {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+      max-width: 300px;
+      margin-top: 20px;
+    }
+    .pricing-calculator h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    select, #priceResult {
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
     }
     button {
-      background: #2b6cb0;
+      background: #007bff;
       color: white;
       border: none;
       padding: 12px 20px;
-      margin: 8px;
+      margin-top: 12px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
-      transition: 0.3s;
+      width: 100%;
     }
     button:hover {
-      background: #1a4369;
+      background: #0056b3;
     }
-    df-messenger {
-      --df-messenger-bot-message: #e0f0ff;
-      --df-messenger-button-titlebar-color: #2b6cb0;
-      --df-messenger-chat-background-color: #ffffff;
-      --df-messenger-send-icon: #2b6cb0;
-      --df-messenger-user-message: #d1ffd1;
+    #priceResult {
+      font-weight: bold;
+      margin-top: 15px;
+      color: #28a745;
     }
   </style>
 </head>
 <body>
 
-  <h1>🌞 Solar Power Chatbot - Rawalpindi</h1>
-  <p>Click a button to ask a question:</p>
+  <h2>⚡ Solar Assistant Portal</h2>
 
-  <div class="btn-container">
-    <button onclick="sendMessage('I want to know my system size')">📏 Get System Size</button>
-    <button onclick="sendMessage('What is the cost estimate?')">💰 Cost Estimation</button>
-    <button onclick="sendMessage('Find solar installers in Rawalpindi')">🔧 Find Installers</button>
-    <button onclick="sendMessage('What is net metering?')">⚡ Learn Net Metering</button>
-    <button onclick="sendMessage('Tell me about solar FAQ')">❓ Solar FAQ</button>
+  <!-- Quick Price Calculator -->
+  <div class="pricing-calculator">
+    <h3>Quick Price Calculator</h3>
+    <select id="systemSize">
+      <option value="3">3kW System</option>
+      <option value="5">5kW System</option>
+      <option value="10">10kW System</option>
+      <option value="15">15kW System</option>
+      <option value="20">20kW System</option>
+    </select>
+    <button onclick="calculatePrice()">Calculate Price</button>
+    <div id="priceResult"></div>
   </div>
 
-  <!-- Dialogflow Messenger widget -->
+  <!-- Dialogflow Messenger integration -->
   <df-messenger
-    intent="WELCOME"
-    chat-title="SolarBot RWP"
+    chat-title="Solar Assistant"
     agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2"
     language-code="en">
   </df-messenger>
 
   <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
-  <script>
-    // Function to simulate button sending message into chat
-    function sendMessage(text) {
-      const iframe = document.querySelector("df-messenger").shadowRoot.querySelector("iframe");
-      const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-      const input = innerDoc.querySelector("input");
-      const sendBtn = innerDoc.querySelector("button");
 
-      input.value = text;
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      sendBtn.click();
+  <script>
+    function calculatePrice() {
+      const size = document.getElementById('systemSize').value;
+      const prices = {
+        3: 650000,
+        5: 950000,
+        10: 1750000,
+        15: 2500000,
+        20: 3200000
+      };
+      const price = prices[size];
+      const resultMsg = `💰 Estimated cost: PKR ${price.toLocaleString()}`;
+
+      // Show result on page
+      document.getElementById('priceResult').innerHTML = resultMsg;
+
+      // Send message to Dialogflow Messenger
+      const dfMessenger = document.querySelector('df-messenger');
+      dfMessenger.renderCustomText(
+        `User selected ${size}kW system. Estimated cost: PKR ${price.toLocaleString()}`
+      );
     }
   </script>
 
