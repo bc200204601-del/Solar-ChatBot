@@ -1,96 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Solar Power Chatbot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solar Power Chatbot - Rawalpindi</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h2 {
       text-align: center;
-      padding: 20px;
-      color: #007bff;
+      background: #f8f9fa;
+      padding: 40px;
     }
-
+    h1 {
+      color: #2b6cb0;
+    }
     .btn-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-      margin: 20px 0;
+      margin: 20px auto;
     }
-
-    .btn {
-      padding: 12px 20px;
-      background: #007bff;
-      color: #fff;
+    button {
+      background: #2b6cb0;
+      color: white;
       border: none;
+      padding: 12px 20px;
+      margin: 8px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
-      transition: background 0.3s ease;
+      transition: 0.3s;
     }
-
-    .btn:hover {
-      background: #0056b3;
+    button:hover {
+      background: #1a4369;
     }
-
     df-messenger {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      --df-messenger-bot-message: #f4f4f9;
-      --df-messenger-button-titlebar-color: #007bff;
+      --df-messenger-bot-message: #e0f0ff;
+      --df-messenger-button-titlebar-color: #2b6cb0;
       --df-messenger-chat-background-color: #ffffff;
-      --df-messenger-font-color: #000;
-      --df-messenger-send-icon: #007bff;
+      --df-messenger-send-icon: #2b6cb0;
+      --df-messenger-user-message: #d1ffd1;
     }
   </style>
 </head>
 <body>
-  <h2>💡 Solar Power Chatbot (Rawalpindi)</h2>
 
-  <!-- Quick Action Buttons -->
+  <h1>🌞 Solar Power Chatbot - Rawalpindi</h1>
+  <p>Click a button to ask a question:</p>
+
   <div class="btn-container">
-    <button class="btn" onclick="openChat('Get System Size')">🌞 Get System Size</button>
-    <button class="btn" onclick="openChat('Cost Estimation')">💰 Cost Estimation</button>
-    <button class="btn" onclick="openChat('Find Installers in Rawalpindi')">🏗 Find Installers</button>
-    <button class="btn" onclick="openChat('Learn Net Metering')">⚡ Learn Net Metering</button>
-    <button class="btn" onclick="openChat('Solar FAQ')">❓ Solar FAQ</button>
+    <button onclick="sendMessage('I want to know my system size')">📏 Get System Size</button>
+    <button onclick="sendMessage('What is the cost estimate?')">💰 Cost Estimation</button>
+    <button onclick="sendMessage('Find solar installers in Rawalpindi')">🔧 Find Installers</button>
+    <button onclick="sendMessage('What is net metering?')">⚡ Learn Net Metering</button>
+    <button onclick="sendMessage('Tell me about solar FAQ')">❓ Solar FAQ</button>
   </div>
 
-  <!-- Dialogflow Messenger Widget -->
+  <!-- Dialogflow Messenger widget -->
+  <df-messenger
+    intent="WELCOME"
+    chat-title="SolarBot RWP"
+    agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2"
+    language-code="en">
+  </df-messenger>
+
   <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
-<df-messenger
-  chat-icon="https:&#x2F;&#x2F;www.google.com&#x2F;search?sca_esv=b4e332f294b324c3&amprlz=1C1CHBF_enPK1096PK1097&ampudm=2&ampfbs=AIIjpHxU7SXXniUZfeShr2fp4giZ1Y6MJ25_tmWITc7uy4KIeoJTKjrFjVxydQWqI2NcOha3O1YqG67F0QIhAOFN_ob1xGdzU5Cnyn-oUzTul2B5TXRzAeIy3FI7wzggwHPeZE5cVxJF3TSy6VJy__A91WVw8jso2MVzslHtne5IBzFZ7wiBgKvuGJadfgZ9to9wUGx5Slqn&ampq=agent+avatar+solar+url&ampsa=X&ampved=2ahUKEwjih4iEgauPAxWh7AIHHe9EKEMQtKgLegQIEhAB&ampbiw=1344&ampbih=671&ampdpr=1.25#vhid=4xI1dWFfBAmyMM&ampvssid=mosaic"
-  intent="WELCOME"
-  chat-title="SolarPowerBot_RWP"
-  agent-id="728466b3-b1f9-4094-9b64-ece38da84ac2"
-  language-code="en"
-></df-messenger>
-
   <script>
-    function openChat(message) {
-      // open the chatbot window
-      const dfMessenger = document.querySelector("df-messenger");
-      dfMessenger.setAttribute("chat-open", "true");
+    // Function to simulate button sending message into chat
+    function sendMessage(text) {
+      const iframe = document.querySelector("df-messenger").shadowRoot.querySelector("iframe");
+      const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+      const input = innerDoc.querySelector("input");
+      const sendBtn = innerDoc.querySelector("button");
 
-      // create a fake "chip" click event to simulate user typing
-      const event = new CustomEvent("df-messenger-send", {
-        detail: { message }
-      });
-      window.dispatchEvent(event);
+      input.value = text;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      sendBtn.click();
     }
   </script>
+
 </body>
 </html>
