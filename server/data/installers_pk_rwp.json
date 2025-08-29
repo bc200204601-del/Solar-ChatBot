@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Premier Energy",
+    "phone": "051-xxxxxxx",
+    "address": "Rawalpindi/Islamabad region",
+    "rating": 4.8,
+    "notes": "AEDB-certified, turnkey solutions"
+  },
+  {
+    "name": "SkyElectric",
+    "phone": "051-xxxxxxx",
+    "address": "Islamabad & Rawalpindi",
+    "rating": 4.9,
+    "notes": "Smart solar systems, premium components"
+  },
+  {
+    "name": "Sun Spark Solar Energy",
+    "phone": "051-xxxxxxx",
+    "address": "Rawalpindi local",
+    "rating": 4.6,
+    "notes": "Affordable local installations"
+  },
+  {
+    "name": "Reon Energy",
+    "phone": "051-xxxxxxx",
+    "address": "Nationwide (including RWP)",
+    "rating": 4.7,
+    "notes": "Commercial and large-scale projects"
+  },
+  {
+    "name": "NK Solar",
+    "phone": "0300-9797954",
+    "address": "Chakri Road, Rawalpindi",
+    "rating": 4.5,
+    "notes": "20+ years experience, net-metering specialists"
+  }
+]

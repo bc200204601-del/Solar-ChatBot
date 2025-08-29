@@ -1,0 +1,27 @@
+[
+  {
+    "topic": "maintenance",
+    "question": "How to maintain solar panels?",
+    "answer": "Clean panels every 2-3 months using soft water and a cloth. Avoid harsh chemicals. Check wiring annually. In dusty areas, increase cleaning frequency."
+  },
+  {
+    "topic": "cloudy_day",
+    "question": "Do solar panels work on cloudy or rainy days?",
+    "answer": "Yes, panels still generate 10-25% of their capacity during cloudy/rainy days. For backup, hybrid systems with batteries are recommended."
+  },
+  {
+    "topic": "lifespan",
+    "question": "What is the lifespan of a solar system?",
+    "answer": "Most panels last 25-30 years with 80% efficiency remaining. Inverters usually last 10-12 years. Proper maintenance extends system life."
+  },
+  {
+    "topic": "ac_usage",
+    "question": "Can I run an AC on a solar system?",
+    "answer": "Yes, you can. A 1.5 ton AC typically needs a 3-5kW solar system depending on usage hours. Hybrid systems with batteries ensure uninterrupted AC use."
+  },
+  {
+    "topic": "warranty",
+    "question": "What warranties are available for solar systems?",
+    "answer": "Panels come with 10-12 years product warranty and 25 years performance warranty. Inverters usually have 5-10 years warranty depending on brand."
+  }
+]
