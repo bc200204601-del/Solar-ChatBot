@@ -1,98 +1,116 @@
+import os
+import json
 from flask import Flask, request, jsonify
-import json, os
 
 app = Flask(__name__)
 
-# Paths to JSON data files
-FAQS_PATH = os.path.join("server", "data", "faqs.json")
-INSTALLERS_PATH = os.path.join("server", "data", "installers_pk_rwp.json")
+# --- Load Data ---
+INSTALLERS_FILE = "server/data/installers_pk_rwp.json"
+FAQ_FILE = "server/data/faqs.json"
 
-# Load FAQs
-if os.path.exists(FAQS_PATH):
-    with open(FAQS_PATH, "r", encoding="utf-8") as f:
-        FAQS = json.load(f)
-else:
-    FAQS = {}
+with open(INSTALLERS_FILE, "r", encoding="utf-8") as f:
+    installers_data = json.load(f)
 
-# Load Installers
-if os.path.exists(INSTALLERS_PATH):
-    with open(INSTALLERS_PATH, "r", encoding="utf-8") as f:
-        INSTALLERS = json.load(f)
-else:
-    INSTALLERS = []
+with open(FAQ_FILE, "r", encoding="utf-8") as f:
+    faqs_data = json.load(f)
+
+
+# --- Routes ---
+@app.route("/", methods=["GET"])
+def home():
+    return "✅ Solar Chatbot Webhook is running!"
 
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    """Webhook endpoint for Dialogflow"""
     req = request.get_json(silent=True, force=True)
     intent = req.get("queryResult", {}).get("intent", {}).get("displayName", "")
-    parameters = req.get("queryResult", {}).get("parameters", {})
-    response_text = "⚠️ Sorry, I didn’t understand that."
 
-    # --- Intent: Get System Size ---
     if intent == "Get_System_Size":
-        area = parameters.get("area")
-        units = parameters.get("units")
-        bill = parameters.get("bill")
-        response_text = (
-            f"📐 Based on your input:\n"
-            f"- Area: {area} sqft\n- Units: {units}\n- Bill: PKR {bill}\n\n"
-            "👉 Recommended: ~5kW system."
-        )
+        return handle_get_system_size(req)
 
-    # --- Intent: Check Cost ---
     elif intent == "Check_Cost":
-        size = int(parameters.get("size", 0))
-        costs = {
-            3: {"total": 650000, "panels": 400000, "inverter": 150000, "installation": 100000},
-            5: {"total": 950000, "panels": 600000, "inverter": 200000, "installation": 150000},
-            10: {"total": 1750000, "panels": 1200000, "inverter": 350000, "installation": 200000},
-            15: {"total": 2500000, "panels": 1800000, "inverter": 500000, "installation": 200000},
-            20: {"total": 3200000, "panels": 2300000, "inverter": 600000, "installation": 300000},
-        }
-        if size in costs:
-            b = costs[size]
-            response_text = (
-                f"💡 Cost for {size}kW system:\n"
-                f"• Panels: PKR {b['panels']:,}\n"
-                f"• Inverter: PKR {b['inverter']:,}\n"
-                f"• Installation: PKR {b['installation']:,}\n"
-                f"👉 Total: PKR {b['total']:,}"
-            )
-        else:
-            response_text = "Please pick 3, 5, 10, 15, or 20 kW."
+        return handle_check_cost(req)
 
-    # --- Intent: Learn Net Metering ---
-    elif intent == "Learn_Net_Metering":
-        response_text = (
-            "⚡ Net Metering in Pakistan:\n"
-            "1. Apply to DISCO (e.g. IESCO)\n"
-            "2. Install bi-directional meter\n"
-            "3. Get NEPRA approval\n"
-            "4. Sell excess units back to grid"
-        )
-
-    # --- Intent: Find Installer ---
     elif intent == "Find_Installer":
-        if INSTALLERS:
-            response_text = "🏢 Top Solar Installers in Rawalpindi:\n"
-            for inst in INSTALLERS:
-                response_text += f"- {inst['name']} 📞 {inst['phone']} 📍 {inst['address']}\n"
-        else:
-            response_text = "Installer data not found."
+        return handle_find_installer()
 
-    # --- Intent: FAQs ---
+    elif intent == "Learn_Net_Metering":
+        return handle_learn_net_metering()
+
     elif intent == "Solar_FAQ":
-        topic = parameters.get("faq_topic", "").lower()
-        response_text = FAQS.get(
-            topic,
-            "FAQ not found. Try asking about 'maintenance', 'cloudy day', or 'lifespan'."
+        return handle_solar_faq(req)
+
+    return jsonify({"fulfillmentText": "Sorry, I didn't understand that."})
+
+
+# --- Intent Handlers ---
+def handle_get_system_size(req):
+    params = req.get("queryResult", {}).get("parameters", {})
+    area = params.get("area")
+    units = params.get("units")
+    bill = params.get("bill")
+
+    if area:
+        return jsonify({"fulfillmentText": f"Based on {area} marla area, you may need a 5–7 kW system."})
+    elif units:
+        return jsonify({"fulfillmentText": f"With {units} monthly units, approx. 3–5 kW system is suitable."})
+    elif bill:
+        return jsonify({"fulfillmentText": f"With a monthly bill of PKR {bill}, a 5–10 kW system is recommended."})
+    else:
+        return jsonify({"fulfillmentText": "Can you provide area (marla/sqft), monthly units, or bill amount?"})
+
+
+def handle_check_cost(req):
+    params = req.get("queryResult", {}).get("parameters", {})
+    size = int(params.get("size", 0))
+
+    cost_table = {
+        3: {"system": "3kW", "price": 650000, "breakdown": {"Panels": 400000, "Inverter": 120000, "Installation": 80000, "Misc": 50000}},
+        5: {"system": "5kW", "price": 950000, "breakdown": {"Panels": 600000, "Inverter": 150000, "Installation": 120000, "Misc": 80000}},
+        10: {"system": "10kW", "price": 1750000, "breakdown": {"Panels": 1100000, "Inverter": 250000, "Installation": 250000, "Misc": 150000}},
+        15: {"system": "15kW", "price": 2500000, "breakdown": {"Panels": 1600000, "Inverter": 350000, "Installation": 350000, "Misc": 200000}},
+        20: {"system": "20kW", "price": 3200000, "breakdown": {"Panels": 2000000, "Inverter": 500000, "Installation": 450000, "Misc": 250000}},
+    }
+
+    if size in cost_table:
+        data = cost_table[size]
+        breakdown_text = "\n".join([f"- {k}: PKR {v:,}" for k, v in data["breakdown"].items()])
+        reply = f"💰 Estimated cost for {data['system']} = PKR {data['price']:,}\nBreakdown:\n{breakdown_text}"
+        return jsonify({"fulfillmentText": reply})
+    else:
+        return jsonify({"fulfillmentText": "Please choose from 3, 5, 10, 15, or 20 kW systems."})
+
+
+def handle_find_installer():
+    reply = "🔧 Top Solar Installers in Rawalpindi:\n"
+    for inst in installers_data["installers"][:3]:
+        reply += f"- {inst['name']} 📞 {inst['phone']} 📍 {inst['address']}\n"
+    return jsonify({"fulfillmentText": reply})
+
+
+def handle_learn_net_metering():
+    return jsonify({
+        "fulfillmentText": (
+            "⚡ Net Metering allows you to sell excess electricity back to the grid. "
+            "In Pakistan, NEPRA regulates it. You apply through your DISCO, install a bi-directional meter, "
+            "and get credit for extra units. Approval takes 1–2 months."
         )
+    })
 
-    return jsonify({"fulfillmentText": response_text})
+
+def handle_solar_faq(req):
+    params = req.get("queryResult", {}).get("parameters", {})
+    topic = params.get("faq_topic", "").lower()
+
+    for faq in faqs_data["faqs"]:
+        if topic in faq["topic"].lower():
+            return jsonify({"fulfillmentText": faq["answer"]})
+
+    return jsonify({"fulfillmentText": "I don’t have information on that FAQ yet."})
 
 
+# --- Start App ---
 if __name__ == "__main__":
-    # Flask app will run on port 5000 (for Render/ngrok)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))  # ✅ dynamic port for Render
+    app.run(host="0.0.0.0", port=port)
